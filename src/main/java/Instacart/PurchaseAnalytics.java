@@ -1,46 +1,61 @@
 package Instacart;
 
 import Instacart.entities.Order;
-import Instacart.entities.Product;
+import Instacart.entities.Counters;
 import Instacart.ingestion.CSV;
 import Instacart.processing.Statistics;
+import Instacart.visualize.Report;
 
-//import java.io.IOException;
-//import java.nio.file.Files;
-//import java.nio.file.Paths;
-//import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.*;
 
 public class PurchaseAnalytics {
+
     public static void main(String[] args) {
-        String fileOrders = "/Users/include/Downloads/instacart_2017_05_01/orders.csv";
-        String fileProducts = "/Users/include/Downloads/instacart_2017_05_01/products.csv";
+        if (args.length == 1) {
+            String fileProducts = args[0];
+            inline(fileProducts);
+        } else if (args.length == 2) {
+            String fileOrders = args[0];
+            String fileProducts = args[1];
+            filesGiven(fileOrders, fileProducts);
+        } else {
+            System.out.println("Wrong arguments...");
+        }
+    }
 
-//        long lineCount = 0;
-//        try {
-//            lineCount = Files.lines(Paths.get(fileOrders)).count();
-//        } catch (IOException ex) {
-//            ex.printStackTrace();
-//        }
+    private static void inline(String fileProducts) {
+        Instant start = Instant.now();
 
+        Map<Integer, Integer> products = CSV.getProductsDepartment(fileProducts);
+        Map<Integer, Counters> summary = new TreeMap<>();
 
-        List<Product> productsCatalog = CSV.getProducts(fileProducts);
+        Scanner scan = new Scanner(System.in);
+        scan.nextLine();
+        while (scan.hasNext()) {
+            String line = scan.nextLine();
+            Order order = new Order(line);
+            Statistics.validateOrder(products, summary, order);
+        }
+
+        Report.toCsv(summary);
+
+        Instant finish = Instant.now();
+        Report.executionTime(Duration.between(start,finish).toMillis());
+    }
+
+    private static void filesGiven(String fileOrders, String fileProducts) {
+        Instant start = Instant.now();
+
+        Map<Integer, Integer> products = CSV.getProductsDepartment(fileProducts);
         List<Order> orderProducts = CSV.getOrders(fileOrders);
 
+        Map<Integer, Counters> summary = Statistics.getSummary(products, orderProducts);
 
-        Set productsInOrders = orderProducts.stream().map(Order::getProductId).collect(Collectors.toSet());
-        Map<Integer, Integer> productsSubset = productsCatalog.stream()
-                .filter(product -> productsInOrders.contains(product.getId()))
-                .collect(Collectors.toMap(Product::getId, Product::getDepartmentId));
+        Report.toCsv(summary);
 
-
-        Statistics.getSummary(orderProducts, productsSubset);
-
-
-        System.out.println("Done!");
-
+        Instant finish = Instant.now();
+        Report.executionTime(Duration.between(start,finish).toMillis());
     }
 }

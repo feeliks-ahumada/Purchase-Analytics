@@ -1,24 +1,15 @@
 package Instacart.entities;
 
-public class Report {
-    private int departmentId;
+/**
+ * Represents the columns of the final report
+ */
+public class Counters {
     private int numberOfOrders;
     private int numberOfFirstOrders;
-    private float percentage;
 
-    public Report(int departmentId, int numberOfOrders, int numberOfFirstOrders, float percentage) {
-        this.departmentId = departmentId;
+    public Counters(int numberOfOrders, int numberOfFirstOrders) {
         this.numberOfOrders = numberOfOrders;
         this.numberOfFirstOrders = numberOfFirstOrders;
-        this.percentage = percentage;
-    }
-
-    public int getDepartmentId() {
-        return departmentId;
-    }
-
-    public void setDepartmentId(int departmentId) {
-        this.departmentId = departmentId;
     }
 
     public int getNumberOfOrders() {
@@ -38,10 +29,8 @@ public class Report {
     }
 
     public float getPercentage() {
-        return percentage;
-    }
+        if (numberOfOrders == 0) return 0;
 
-    public void setPercentage(float percentage) {
-        this.percentage = percentage;
+        return (float)numberOfFirstOrders / (float)numberOfOrders;
     }
 }

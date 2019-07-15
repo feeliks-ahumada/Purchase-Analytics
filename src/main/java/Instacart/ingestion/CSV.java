@@ -10,9 +10,17 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * .csv loader
+ */
 public class CSV {
     private static final String COMMA = ",";
 
+    /**
+     * Products parser
+     * @param fileProducts
+     * @return List of products
+     */
     public static List<Product> getProducts(String fileProducts) {
         List<Product> inputList = new ArrayList<>();
 
@@ -29,6 +37,34 @@ public class CSV {
         return inputList;
     }
 
+    /**
+     * Load product-department relationship
+     * @param filePath
+     * @return Map of Integers
+     */
+    public static Map<Integer, Integer> getProductsDepartment(String filePath) {
+        try {
+            File inputFile = new File(filePath);
+            InputStream inputStream = new FileInputStream(inputFile);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+
+            //I'm ignoring the others fields of product catalog because are irrelevant for the procedure
+            return reader.lines().skip(1).collect(Collectors.toMap(
+                    l -> Integer.parseInt(l.substring(0, l.indexOf(","))),
+                    l -> Integer.parseInt(l.substring(l.lastIndexOf(',') + 1))
+            ));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    /**
+     * Orders parser
+     * @param fileProductsPrior
+     * @return List of Orders
+     */
     public static List<Order> getOrders(String fileProductsPrior) {
         List<Order> inputList = new ArrayList<>();
 
@@ -45,34 +81,24 @@ public class CSV {
         return inputList;
     }
 
+    /**
+     * Function used in parse of Order items
+     */
     private static Function<String, Order> mapToOrderItem = (line) -> {
-
         String[] rows = line.split(COMMA);
         Order instance = new Order();
         instance.setId(Integer.parseInt(rows[0]));
         instance.setProductId(Integer.parseInt(rows[1]));
-        instance.setReordered(Byte.parseByte(rows[3]));
+        int reordered = Integer.parseInt(rows[3]);
+        instance.setReordered(reordered != 0);
 
         return instance;
     };
 
-
+    /**
+     * Function used in parse of Product items
+     */
     private static Function<String, Product> mapToProductItem = (line) -> {
-
-//        int sub = line.indexOf("\"");
-//        String name, id, aisleId, departmentId;
-//        if ( sub > 0) {
-//            id = line.substring(0, sub - 1);
-//            sub = line.lastIndexOf("\"");
-//            name = line.substring(id.length() + 2, sub);
-//            aisleId = line.substring(sub + 2, line.indexOf(',',sub + 2));
-//            departmentId = line.substring(line.lastIndexOf(',') + 1);
-//        } else {
-//            String[] rows = line.split(COMMA);
-//            id = rows[0];
-//            departmentId = rows[3];
-//        }
-
         Product instance = new Product();
         instance.setId(Integer.parseInt(line.substring(0, line.indexOf(","))));
         instance.setDepartmentId(Integer.parseInt(line.substring(line.lastIndexOf(',') + 1)));
