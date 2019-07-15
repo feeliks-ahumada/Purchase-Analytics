@@ -27,6 +27,7 @@
             <plugin>
                 <artifactId>maven-jar-plugin</artifactId>
                 <configuration>
+                    <outputDirectory>src</outputDirectory>
                     <archive>
                         <manifest>
                             <mainClass>Instacart.PurchaseAnalytics</mainClass>
