@@ -6,5 +6,5 @@
 mvn -f src/ package
 echo 'Compilation: Success!'
 echo 'Processing report..'
-java -jar src/PurchaseAnalytics-1.0-SNAPSHOT.jar "input/order_products.csv" "input/products.csv" > output/report.csv
+java -jar src/PurchaseAnalytics-1.0-SNAPSHOT.jar "input/order_products.csv" "input/products.csv" > output/counters.csv
 echo 'Done!'
